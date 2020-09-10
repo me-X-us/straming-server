@@ -5,8 +5,8 @@ plugins {
 	id 'java'
 }
 
-group = 'com.restapi'
-version = '0.0.1-SNAPSHOT'
+group = 'com.mexus'
+version = '0.0.1'
 sourceCompatibility = '11'
 
 configurations {
