@@ -6,7 +6,6 @@ import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 /**
@@ -24,11 +23,12 @@ public class MediaController {
 
     @GetMapping("/stream/{fileType}/{fileName}")
     public ResponseEntity<byte[]> streamVideo(
-            HttpServletResponse response,
             @RequestHeader(value = "Range", required = false) String httpRangeList,
             @PathVariable("fileType") String fileType,
             @PathVariable("fileName") String fileName
     ) throws IOException {
-        return mediaService.prepareContent(fileName, fileType, httpRangeList);
+        if (httpRangeList == null)
+            return mediaService.streamingMedia(fileName, fileType);
+        return mediaService.streamingMediaRange(fileName, fileType, httpRangeList);
     }
 }

@@ -33,39 +33,44 @@ public class MediaService {
     public static final int BYTE_RANGE = 1024;
 
     /**
-     * Prepare the content.
+     * Streaming Media
+     *
+     * @param fileName String.
+     * @param fileType String.
+     * @return ResponseEntity.
+     */
+    public ResponseEntity<byte[]> streamingMedia(String fileName, String fileType) throws IOException {
+        String fullFileName = fileName + "." + fileType;
+        Long fileSize = getFileSizeByName(fullFileName);
+        return ResponseEntity.status(HttpStatus.OK)
+                .header(CONTENT_TYPE, "video/" + fileType)
+                .header(CONTENT_LENGTH, String.valueOf(fileSize))
+                .body(readByteRange(fullFileName, 0, fileSize - 1));
+    }
+
+    /**
+     * Streaming Ranged Media
      *
      * @param fileName String.
      * @param fileType String.
      * @param range    String.
      * @return ResponseEntity.
      */
-    public ResponseEntity<byte[]> prepareContent(String fileName, String fileType, String range) throws IOException {
-        long rangeStart = 0;
-        long rangeEnd;
-        Long fileSize;
+    public ResponseEntity<byte[]> streamingMediaRange(String fileName, String fileType, String range) throws IOException {
         String fullFileName = fileName + "." + fileType;
-        fileSize = getFileSize(fullFileName);
-        if (range == null)
-            return ResponseEntity.status(HttpStatus.OK)
-                    .header(CONTENT_TYPE, "video/" + fileType)
-                    .header(CONTENT_LENGTH, String.valueOf(fileSize))
-                    .body(readByteRange(fullFileName, rangeStart, fileSize - 1));
+        Long fileSize = getFileSizeByName(fullFileName);
 
         String[] ranges = range.split("-");
-        rangeStart = Long.parseLong(ranges[0].substring(6));
-        if (ranges.length > 1) {
-            rangeEnd = Long.parseLong(ranges[1]);
-            if (fileSize < rangeEnd)
-                rangeEnd = fileSize - 1;
-        } else
+        long rangeStart = Long.parseLong(ranges[0].substring(6));
+        long rangeEnd = Long.parseLong(ranges[1]);
+        if (fileSize <= rangeEnd)
             rangeEnd = fileSize - 1;
 
         return ResponseEntity.status(HttpStatus.PARTIAL_CONTENT)
                 .header(CONTENT_TYPE, "video/" + fileType)
                 .header(ACCEPT_RANGES, "bytes")
                 .header(CONTENT_LENGTH, String.valueOf((rangeEnd - rangeStart) + 1))
-                .header(CONTENT_RANGE, "bytes" + " " + rangeStart + "-" + rangeEnd + "/" + fileSize)
+                .header(CONTENT_RANGE, "bytes " + rangeStart + "-" + rangeEnd + "/" + fileSize)
                 .body(readByteRange(fullFileName, rangeStart, rangeEnd));
     }
 
@@ -104,15 +109,15 @@ public class MediaService {
     }
 
     /**
-     * Content length.
+     * Getting the size from file name
      *
      * @param fileName String.
      * @return Long.
      */
-    public Long getFileSize(String fileName) {
+    public Long getFileSizeByName(String fileName) {
         return Optional.ofNullable(fileName)
                 .map(file -> Paths.get(getFilePath(), file))
-                .map(this::sizeFromFile)
+                .map(this::getFileSizeByPath)
                 .orElse(0L);
     }
 
@@ -122,12 +127,12 @@ public class MediaService {
      * @param path Path.
      * @return Long.
      */
-    private Long sizeFromFile(Path path) {
+    private Long getFileSizeByPath(Path path) {
         try {
             return Files.size(path);
         } catch (IOException ioException) {
             logger.error("Error while getting the file size", ioException);
+            return 0L;
         }
-        return 0L;
     }
 }
