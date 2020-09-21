@@ -62,8 +62,12 @@ public class MediaService {
 
         String[] ranges = range.split("-");
         long rangeStart = Long.parseLong(ranges[0].substring(6));
-        long rangeEnd = Long.parseLong(ranges[1]);
-        if (fileSize <= rangeEnd)
+        long rangeEnd;
+        if (ranges.length > 1) {
+            rangeEnd = Long.parseLong(ranges[1]);
+            if (fileSize < rangeEnd)
+                rangeEnd = fileSize - 1;
+        } else
             rangeEnd = fileSize - 1;
 
         return ResponseEntity.status(HttpStatus.PARTIAL_CONTENT)
