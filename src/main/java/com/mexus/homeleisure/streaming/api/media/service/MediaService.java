@@ -151,6 +151,6 @@ public class MediaService {
     if (httpRangeList == null) {
       return streamingMedia(trainingId + "_shape", "mp4");
     }
-    return streamingMediaRange(trainingId + "-shape", "mp4", httpRangeList);
+    return streamingMediaRange(trainingId + "_shape", "mp4", httpRangeList);
   }
 }
