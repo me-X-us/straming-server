@@ -33,10 +33,10 @@ jobs:
           latest
           ${{github.sha}}
         imageName: streaming-server
-#    - name: Deploy on Test Server
-#      uses: garygrossgarten/github-action-ssh@release
-#      with:
-#        command: cat ~/packageToken | sudo docker login https://docker.pkg.github.com --username always0ne  --password-stdin && sudo docker stop testserver && sudo docker rm testserver && sudo docker run -d  -p 8080:8080 --name=testserver -v /etc/localtime:/etc/localtime:ro  -e TZ=Asia/Seoul  --restart=unless-stopped docker.pkg.github.com/always0ne/springbootrestapitemplate/test:${{github.sha}}
-#        host: ${{ secrets.HOST }}
-#        username: ${{ secrets.USERNAME }}
-#        privateKey: ${{ secrets.PRIVATE_KEY}}
+    - name: Deploy on Test Server
+      uses: garygrossgarten/github-action-ssh@release
+      with:
+        command: cat ~/packageToken | sudo docker login https://docker.pkg.github.com --username always0ne  --password-stdin && sudo docker stop streaming-server && sudo docker rm streaming-server && sudo docker run -d  -p 8888:8080 --name=streaming-server -v /etc/localtime:/etc/localtime:ro  -e TZ=Asia/Seoul -e SLACK_URL=${{ secrets.SLACK_URL }} --restart=unless-stopped docker.pkg.github.com/me-X-us/straming-server/streaming-server:${{github.sha}}
+        host: ${{ secrets.HOST }}
+        username: ${{ secrets.USERNAME }}
+        privateKey: ${{ secrets.PRIVATE_KEY}}

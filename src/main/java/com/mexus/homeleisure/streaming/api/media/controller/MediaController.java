@@ -16,19 +16,22 @@ import java.io.IOException;
  */
 @RestController
 @RequiredArgsConstructor
-@RequestMapping(value = "/media", produces = MediaTypes.HAL_JSON_VALUE)
+@RequestMapping(value = "/training", produces = MediaTypes.HAL_JSON_VALUE)
 public class MediaController {
 
     private final MediaService mediaService;
 
-    @GetMapping("/stream/{fileType}/{fileName}")
+    @GetMapping("/{trainingId}/video")
     public ResponseEntity<byte[]> streamVideo(
-            @RequestHeader(value = "Range", required = false) String httpRangeList,
-            @PathVariable("fileType") String fileType,
-            @PathVariable("fileName") String fileName
-    ) throws IOException {
-        if (httpRangeList == null)
-            return mediaService.streamingMedia(fileName, fileType);
-        return mediaService.streamingMediaRange(fileName, fileType, httpRangeList);
+        @RequestHeader(value = "Range", required = false) String httpRangeList,
+        @PathVariable Long trainingId) throws IOException {
+        return mediaService.streamingVideo(trainingId, httpRangeList);
+    }
+
+    @GetMapping("/{trainingId}/shape")
+    public ResponseEntity<byte[]> streamShape(
+        @RequestHeader(value = "Range", required = false) String httpRangeList,
+        @PathVariable Long trainingId) throws IOException {
+        return mediaService.streamingShape(trainingId, httpRangeList);
     }
 }
